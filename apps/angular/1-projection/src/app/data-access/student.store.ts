@@ -1,23 +1,24 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 import { Student } from '../model/student.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StudentStore {
-  private students = new BehaviorSubject<Student[]>([]);
-  students$ = this.students.asObservable();
+  private _students = signal<Student[]>([]);
+  public readonly students = this._students.asReadonly();
 
   addAll(students: Student[]) {
-    this.students.next(students);
+    this._students.set(students);
   }
 
   addOne(student: Student) {
-    this.students.next([...this.students.value, student]);
+    this._students.update((students) => [...students, student]);
   }
 
   deleteOne(id: number) {
-    this.students.next(this.students.value.filter((s) => s.id !== id));
+    this._students.update((students) =>
+      students.filter((student) => student.id !== id),
+    );
   }
 }
